@@ -1,12 +1,13 @@
 Powerup = Class{}
 
-function Powerup:init()
+function Powerup:init(skin)
     self.width = 16
     self.height = 16
     self.x = math.random(1,VIRTUAL_WIDTH)
     self.y = 0
     self.dy = POWERUP_SPEED
     self.active = false
+    self.skin = skin
 end
 
 function Powerup:update(dt)
@@ -44,7 +45,7 @@ end
 
 function Powerup:render()
     if self.active then
-        love.graphics.draw(gTextures['main'], gFrames['powerup'][1], self.x, self.y)
+        love.graphics.draw(gTextures['main'], gFrames['powerup'][self.skin], self.x, self.y)
     end
 end
 

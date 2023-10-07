@@ -27,9 +27,13 @@ function PlayState:enter(params)
     self.highScores = params.highScores
     self.ball = params.ball
     self.level = params.level
-    self.powerup = Powerup()
+    self.powerup = Powerup(1)
+    self.unlock = Powerup(2)
     self.recoverPoints = 5000
     self.powerupPoints = params.powerupPoints
+    self.unlockPoints = params.unlockPoints
+    self.unlocked = false
+    self.unlockTimer = 30
     self.bonusBalls = {}
 
     -- give ball random starting velocity
@@ -55,6 +59,7 @@ function PlayState:update(dt)
     self.paddle:update(dt)
     self.ball:update(dt)
     self.powerup:update(dt)
+    self.unlock:update(dt)
 
     if self.ball:collides(self.paddle) then
         -- raise ball above paddle in case it goes below it, then reverse dy
@@ -67,11 +72,26 @@ function PlayState:update(dt)
         end
     end
 
+    if self.unlock:collides(self.paddle) then
+        if self.unlock.active then
+            self.unlocked = true
+            self.unlockTimer = 30
+            self.unlock.active = false
+            self.unlock:reset()
+        end
+    end
+
+    if self.unlockTimer > 0 then
+        self.unlockTimer = self.unlockTimer - dt
+    end
+    if self.unlockTimer <= 0 then
+        self.unlocked = false
+    end
         
     if self.powerup:collides(self.paddle) then
         if self.powerup.active then
-            ball1 = spawnBall(self.powerup)
-            ball2 = spawnBall(self.powerup)
+            local ball1 = spawnBall(self.powerup)
+            local ball2 = spawnBall(self.powerup)
             table.insert(self.bonusBalls, ball1)
             table.insert(self.bonusBalls, ball2)
             self.powerup.active = false
@@ -83,15 +103,29 @@ function PlayState:update(dt)
 
         -- only check collision if we're in play
         if brick.inPlay and self.ball:collides(brick) then
+            if brick.locked and self.unlocked or not brick.locked then
+                self.score = self.score + 250
 
-            -- add to score
-            self.score = self.score + (brick.tier * 200 + brick.color * 25)
+                -- trigger the brick's hit function, which removes it from play
+                brick:hit()
+            elseif not brick.locked then
+                self.score = self.score + (brick.tier * 200 + brick.color * 25)
 
-            -- trigger the brick's hit function, which removes it from play
-            brick:hit()
+                -- trigger the brick's hit function, which removes it from play
+                brick:hit()
+            end
 
             -- if we have enough points, recover a point of health
-            recoverHealth(self.score, self.recoverPoints, self.health)
+            if self.score > self.recoverPoints then
+                -- can't go above 3 health
+                self.health = math.min(3, self.health + 1)
+        
+                -- multiply recover points by 2
+                self.recoverPoints = self.recoverPoints + math.min(100000, self.recoverPoints * 2)
+                self.paddle:grow()
+                -- play recover sound effect
+                gSounds['recover']:play()
+            end
 
             -- go to our victory screen if there are no more bricks left
             if self:checkVictory() then
@@ -105,7 +139,8 @@ function PlayState:update(dt)
                     highScores = self.highScores,
                     ball = self.ball,
                     recoverPoints = self.recoverPoints,
-                    powerupPoints = self.powerupPoints
+                    powerupPoints = self.powerupPoints,
+                    unlockPoints = self.unlockPoints
                 })
             end
 
@@ -122,13 +157,29 @@ function PlayState:update(dt)
         if brick.inPlay then
             for i, bonus in pairs(self.bonusBalls) do
                 if bonus:collides(brick) then
-                    self.score = self.score + (brick.tier * 200 + brick.color * 25)
-
-                    -- trigger the brick's hit function, which removes it from play
-                    brick:hit()
+                    if brick.locked and self.unlocked or not brick.locked then
+                        self.score = self.score + 250
+    
+                        -- trigger the brick's hit function, which removes it from play
+                        brick:hit()
+                    elseif not brick.locked then
+                        self.score = self.score + (brick.tier * 200 + brick.color * 25)
+    
+                        -- trigger the brick's hit function, which removes it from play
+                        brick:hit()
+                    end
 
                     -- if we have enough points, recover a point of health
-                    recoverHealth(self.score, self.recoverPoints, self.health)
+                    if self.score > self.recoverPoints then
+                        -- can't go above 3 health
+                        self.health = math.min(3, self.health + 1)
+                
+                        -- multiply recover points by 2
+                        self.recoverPoints = self.recoverPoints + math.min(100000, self.recoverPoints * 2)
+                        self.paddle:grow()
+                        -- play recover sound effect
+                        gSounds['recover']:play()
+                    end
 
                     -- go to our victory screen if there are no more bricks left
                     if self:checkVictory() then
@@ -142,7 +193,8 @@ function PlayState:update(dt)
                             highScores = self.highScores,
                             ball = self.ball,
                             recoverPoints = self.recoverPoints,
-                            powerupPoints = self.powerupPoints
+                            powerupPoints = self.powerupPoints,
+                            unlockPoints = self.unlockPoints
                         })
                     end
 
@@ -158,7 +210,7 @@ function PlayState:update(dt)
     if self.ball.y >= VIRTUAL_HEIGHT then
         self.health = self.health - 1
         gSounds['hurt']:play()
-
+        self.paddle:shrink()
         if self.health == 0 then
             gStateMachine:change('game-over', {
                 score = self.score,
@@ -173,7 +225,8 @@ function PlayState:update(dt)
                 highScores = self.highScores,
                 level = self.level,
                 recoverPoints = self.recoverPoints,
-                powerupPoints = self.powerupPoints
+                powerupPoints = self.powerupPoints,
+                unlockPoints = self.unlockPoints
             })
         end
     end
@@ -188,6 +241,16 @@ function PlayState:update(dt)
         self.powerupPoints = self.powerupPoints + math.random(1000)
     end
 
+    if self.unlock.y >= VIRTUAL_HEIGHT then
+        self.unlock.active = false
+        self.unlock:reset()
+    end
+
+    if self.score > self.unlockPoints then
+        self.unlock.active = true
+        self.unlockPoints = self.unlockPoints + math.random(1000)
+    end
+
     for k, bonus in pairs(self.bonusBalls) do
         bonus:update(dt)
     end
@@ -200,6 +263,8 @@ function PlayState:update(dt)
     if love.keyboard.wasPressed('escape') then
         love.event.quit()
     end
+
+
 end
 
 function PlayState:render()
@@ -220,15 +285,24 @@ function PlayState:render()
     self.paddle:render()
     self.ball:render()
     self.powerup:render()
+    self.unlock:render()
 
     renderScore(self.score)
     renderHealth(self.health)
 
+    if self.unlocked then
+        love.graphics.setFont(gFonts['small'])
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.print(tostring(self.unlockTimer), 5, 20)
+    end
     -- pause text, if paused
     if self.paused then
         love.graphics.setFont(gFonts['large'])
         love.graphics.printf("PAUSED", 0, VIRTUAL_HEIGHT / 2 - 16, VIRTUAL_WIDTH, 'center')
     end
+
+    
+
 end
 
 function PlayState:checkVictory()
@@ -290,18 +364,7 @@ end
 
 
 
-function recoverHealth(score, recoverPoints, health)
-    if score > recoverPoints then
-        -- can't go above 3 health
-        health = math.min(3, health + 1)
 
-        -- multiply recover points by 2
-        recoverPoints = recoverPoints + math.min(100000, recoverPoints * 2)
-
-        -- play recover sound effect
-        gSounds['recover']:play()
-    end
-end
 
 function collisionPaddle(ball, paddle)
     ball.y = paddle.y - 8

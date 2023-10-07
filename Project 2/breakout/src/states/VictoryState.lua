@@ -22,6 +22,8 @@ function VictoryState:enter(params)
     self.ball = params.ball
     self.recoverPoints = params.recoverPoints
     self.powerupPoints = params.powerupPoints
+    self.unlockPoints = params.unlockPoints
+
 end
 
 function VictoryState:update(dt)
@@ -41,7 +43,8 @@ function VictoryState:update(dt)
             score = self.score,
             highScores = self.highScores,
             recoverPoints = self.recoverPoints,
-            powerupPoints = self.powerupPoints
+            powerupPoints = self.powerupPoints,
+            unlockPoints = self.unlockPoints
         })
     end
 end

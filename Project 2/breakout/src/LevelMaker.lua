@@ -47,6 +47,11 @@ function LevelMaker.createMap(level)
     -- highest color of the highest tier, no higher than 5
     local highestColor = math.min(5, level % 5 + 3)
 
+
+    local lockedRow = math.random(1, numRows)
+    local lockedCol = math.random(1, numCols)
+
+
     -- lay out bricks such that they touch each other and fill the space
     for y = 1, numRows do
         -- whether we want to enable skipping for this row
@@ -94,24 +99,28 @@ function LevelMaker.createMap(level)
                 -- y-coordinate
                 y * 16                  -- just use y * 16, since we need top padding anyway
             )
-
-            -- if we're alternating, figure out which color/tier we're on
-            if alternatePattern and alternateFlag then
-                b.color = alternateColor1
-                b.tier = alternateTier1
-                alternateFlag = not alternateFlag
+            if y == lockedRow and x == lockedCol then
+                b.locked = true
+                b.color = 1
+                b.tier = 0
             else
-                b.color = alternateColor2
-                b.tier = alternateTier2
-                alternateFlag = not alternateFlag
+                -- if we're alternating, figure out which color/tier we're on
+                if alternatePattern and alternateFlag then
+                    b.color = alternateColor1
+                    b.tier = alternateTier1
+                    alternateFlag = not alternateFlag
+                else
+                    b.color = alternateColor2
+                    b.tier = alternateTier2
+                    alternateFlag = not alternateFlag
+                end
+
+                -- if not alternating and we made it here, use the solid color/tier
+                if not alternatePattern then
+                    b.color = solidColor
+                    b.tier = solidTier
+                end
             end
-
-            -- if not alternating and we made it here, use the solid color/tier
-            if not alternatePattern then
-                b.color = solidColor
-                b.tier = solidTier
-            end 
-
             table.insert(bricks, b)
 
             -- Lua's version of the 'continue' statement

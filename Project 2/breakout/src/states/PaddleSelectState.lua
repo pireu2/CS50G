@@ -53,7 +53,8 @@ function PaddleSelectState:update(dt)
             highScores = self.highScores,
             level = 1,
             recoverPoints = 5000,
-            powerupPoints = math.random(1000)
+            powerupPoints = math.random(1000),
+            unlockPoints = math.random(1000)
         })
     end
 
@@ -100,4 +101,5 @@ function PaddleSelectState:render()
     -- draw the paddle itself, based on which we have selected
     love.graphics.draw(gTextures['main'], gFrames['paddles'][2 + 4 * (self.currentPaddle - 1)],
         VIRTUAL_WIDTH / 2 - 32, VIRTUAL_HEIGHT - VIRTUAL_HEIGHT / 3)
+
 end

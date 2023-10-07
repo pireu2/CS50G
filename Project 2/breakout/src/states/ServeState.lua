@@ -26,6 +26,7 @@ function ServeState:enter(params)
     self.level = params.level
     self.recoverPoints = params.recoverPoints
     self.powerupPoints = params.powerupPoints
+    self.unlockPoints = params.unlockPoints
 
     -- init new ball (random color for fun)
     self.ball = Ball()
@@ -49,7 +50,8 @@ function ServeState:update(dt)
             ball = self.ball,
             level = self.level,
             recoverPoints = self.recoverPoints,
-            powerupPoints = self.powerupPoints
+            powerupPoints = self.powerupPoints,
+            unlockPoints = self.unlockPoints
         })
     end
 

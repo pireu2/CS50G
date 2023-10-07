@@ -67,7 +67,8 @@ function love.load()
         ['balls'] = GenerateQuadsBalls(gTextures['main']),
         ['bricks'] = GenerateQuadsBricks(gTextures['main']),
         ['hearts'] = GenerateQuads(gTextures['hearts'], 10, 9),
-        ['powerup'] = GenerateQuadsPowerup(gTextures['main'])
+        ['powerup'] = GenerateQuadsPowerup(gTextures['main']),
+        ['locked-brick'] = GenerateLockedBrick(gTextures['main'])
     }
     
     -- initialize our virtual resolution, which will be rendered within our
@@ -209,6 +210,7 @@ function love.draw()
     
     -- display FPS for debugging; simply comment out to remove
     displayFPS()
+
     
     push:apply('end')
 end
