@@ -17,6 +17,7 @@ function Board:init(x, y)
     self.x = x
     self.y = y
     self.matches = {}
+    self.level = 1
 
     self:initializeTiles()
 end
@@ -29,10 +30,18 @@ function Board:initializeTiles()
         -- empty table that will serve as a new row
         table.insert(self.tiles, {})
 
-        for tileX = 1, 8 do
-            
-            -- create a new tile at X,Y with a random color and variety
-            table.insert(self.tiles[tileY], Tile(tileX, tileY, math.random(18), math.random(6)))
+        if self.level <= 6 then     
+            for tileX = 1, 8 do
+                
+                -- create a new tile at X,Y with a random color and variety
+                table.insert(self.tiles[tileY], Tile(tileX, tileY, math.random(18), math.random(self.level)))
+            end
+        else
+            for tileX = 1, 8 do
+                
+                -- create a new tile at X,Y with a random color and variety
+                table.insert(self.tiles[tileY], Tile(tileX, tileY, math.random(18), math.random(6)))
+            end
         end
     end
 
@@ -238,16 +247,25 @@ function Board:getFallingTiles()
 
             -- if the tile is nil, we need to add a new one
             if not tile then
-
-                -- new tile with random color and variety
-                local tile = Tile(x, y, math.random(18), math.random(6))
-                tile.y = -32
-                self.tiles[y][x] = tile
-
-                -- create a new tween to return for this tile to fall down
-                tweens[tile] = {
-                    y = (tile.gridY - 1) * 32
-                }
+                if self.level <= 6 then
+                    -- new tile with random color and variety
+                    local tile = Tile(x, y, math.random(18), math.random(self.level))
+                    tile.y = -32
+                    self.tiles[y][x] = tile
+                    -- create a new tween to return for this tile to fall down
+                    tweens[tile] = {
+                        y = (tile.gridY - 1) * 32
+                    }
+                else
+                    -- new tile with random color and variety
+                    local tile = Tile(x, y, math.random(18), math.random(6))
+                    tile.y = -32
+                    self.tiles[y][x] = tile
+                    -- create a new tween to return for this tile to fall down
+                    tweens[tile] = {
+                        y = (tile.gridY - 1) * 32
+                    }
+                end
             end
         end
     end
