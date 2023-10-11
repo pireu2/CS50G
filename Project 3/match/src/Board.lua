@@ -24,6 +24,8 @@ end
 
 function Board:initializeTiles()
     self.tiles = {}
+    local glowX = math.random(8)
+    local glowY = math.random(8)
 
     for tileY = 1, 8 do
         
@@ -34,13 +36,21 @@ function Board:initializeTiles()
             for tileX = 1, 8 do
                 
                 -- create a new tile at X,Y with a random color and variety
-                table.insert(self.tiles[tileY], Tile(tileX, tileY, math.random(18), math.random(self.level)))
+                if tileX == glowX and tileY == glowY then
+                    table.insert(self.tiles[tileY], Tile(tileX, tileY, math.random(8), math.random(self.level), true))
+                else
+                    table.insert(self.tiles[tileY], Tile(tileX, tileY, math.random(8), math.random(self.level), false))
+                end
             end
         else
             for tileX = 1, 8 do
                 
                 -- create a new tile at X,Y with a random color and variety
-                table.insert(self.tiles[tileY], Tile(tileX, tileY, math.random(18), math.random(6)))
+                if tileX == glowX and tileY == glowY then
+                    table.insert(self.tiles[tileY], Tile(tileX, tileY, math.random(8), math.random(6), true))
+                else
+                    table.insert(self.tiles[tileY], Tile(tileX, tileY, math.random(8), math.random(6), false))
+                end
             end
         end
     end
@@ -84,16 +94,36 @@ function Board:calculateMatches()
                 -- if we have a match of 3 or more up to now, add it to our matches table
                 if matchNum >= 3 then
                     local match = {}
-
+                    local score = 0
+                    local hasGlow = false
                     -- go backwards from here by matchNum
                     for x2 = x - 1, x - matchNum, -1 do
                         
                         -- add each tile to the match that's in that match
                         table.insert(match, self.tiles[y][x2])
+                        score = score + 50 + (self.tiles[y][x2].variety - 1) * 10
+                    end
+
+                    for k, tile in pairs(match) do
+                        if tile.glow then
+                            hasGlow = true
+                        end
+                    end
+
+                    if hasGlow then
+                        match = {}
+                        score = 0
+                        for x3 = 1,8 do
+                            table.insert(match, self.tiles[y][x3])
+                            score = score + 50 + (self.tiles[y][x3].variety - 1) * 10
+                        end
                     end
 
                     -- add this match to our total matches table
-                    table.insert(matches, match)
+                    table.insert(matches, {
+                        ['match'] = match,
+                        ['score'] = score
+                    })
                 end
 
                 matchNum = 1
@@ -108,13 +138,34 @@ function Board:calculateMatches()
         -- account for the last row ending with a match
         if matchNum >= 3 then
             local match = {}
-            
+            local score = 0
+            local hasGlow = false
             -- go backwards from end of last row by matchNum
             for x = 8, 8 - matchNum + 1, -1 do
                 table.insert(match, self.tiles[y][x])
+                score = score + 50 + (self.tiles[y][x].variety - 1) * 10
             end
 
-            table.insert(matches, match)
+            
+            for k, tile in pairs(match) do
+                if tile.glow then
+                    hasGlow = true
+                end
+            end
+
+            if hasGlow then
+                match = {}
+                score = 0
+                for x3 = 1,8 do
+                    table.insert(match, self.tiles[y][x3])
+                    score = score + 50 + (self.tiles[y][x3].variety - 1) * 10
+                end
+            end
+
+            table.insert(matches, {
+                ['match'] = match,
+                ['score'] = score
+            })
         end
     end
 
@@ -133,12 +184,34 @@ function Board:calculateMatches()
 
                 if matchNum >= 3 then
                     local match = {}
+                    local score = 0
+                    local hasGlow = false
 
                     for y2 = y - 1, y - matchNum, -1 do
                         table.insert(match, self.tiles[y2][x])
+                        score = score + 50 + (self.tiles[y][x].variety - 1) * 10
                     end
 
-                    table.insert(matches, match)
+                    
+                    for k, tile in pairs(match) do
+                        if tile.glow then
+                            hasGlow = true
+                        end
+                    end
+
+                    if hasGlow then
+                        match = {}
+                        score = 0
+                        for y3 = 1,8 do
+                            table.insert(match, self.tiles[y3][x])
+                            score = score + 50 + (self.tiles[y3][x].variety - 1) * 10
+                        end
+                    end
+
+                    table.insert(matches, {
+                        ['match'] = match,
+                        ['score'] = score
+                    })
                 end
 
                 matchNum = 1
@@ -150,16 +223,37 @@ function Board:calculateMatches()
             end
         end
 
+        
         -- account for the last column ending with a match
         if matchNum >= 3 then
             local match = {}
-            
+            local score = 0
+            local hasGlow = false
             -- go backwards from end of last row by matchNum
             for y = 8, 8 - matchNum + 1, -1 do
                 table.insert(match, self.tiles[y][x])
+                score = score + 50 + (self.tiles[y][x].variety - 1) * 10
             end
 
-            table.insert(matches, match)
+            for k, tile in pairs(match) do
+                if tile.glow then
+                    hasGlow = true
+                end
+            end
+
+            if hasGlow then
+                match = {}
+                score = 0
+                for y3 = 1,8 do
+                    table.insert(match, self.tiles[y3][x])
+                    score = score + 50 + (self.tiles[y3][x].variety - 1) * 10
+                end
+            end
+
+            table.insert(matches, {
+                ['match'] = match,
+                ['score'] = score
+            })
         end
     end
 
@@ -176,7 +270,7 @@ end
 ]]
 function Board:removeMatches()
     for k, match in pairs(self.matches) do
-        for k, tile in pairs(match) do
+        for k, tile in pairs(match.match) do
             self.tiles[tile.gridY][tile.gridX] = nil
         end
     end
@@ -247,9 +341,10 @@ function Board:getFallingTiles()
 
             -- if the tile is nil, we need to add a new one
             if not tile then
+                local randomValue = math.random(10)
                 if self.level <= 6 then
                     -- new tile with random color and variety
-                    local tile = Tile(x, y, math.random(18), math.random(self.level))
+                    tile = Tile(x, y, math.random(8), math.random(self.level), randomValue <= 1)
                     tile.y = -32
                     self.tiles[y][x] = tile
                     -- create a new tween to return for this tile to fall down
@@ -258,7 +353,7 @@ function Board:getFallingTiles()
                     }
                 else
                     -- new tile with random color and variety
-                    local tile = Tile(x, y, math.random(18), math.random(6))
+                    tile = Tile(x, y, math.random(8), math.random(6), randomValue <= 1)
                     tile.y = -32
                     self.tiles[y][x] = tile
                     -- create a new tween to return for this tile to fall down

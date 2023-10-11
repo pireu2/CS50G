@@ -72,7 +72,6 @@ end
 
 function PlayState:update(dt)
 
-    print(self.board.level)
     if love.keyboard.wasPressed('escape') then
         love.event.quit()
     end
@@ -144,7 +143,6 @@ function PlayState:update(dt)
                 gSounds['error']:play()
                 self.highlightedTile = nil
             else
-                
                 -- swap grid positions of tiles
                 local tempX = self.highlightedTile.gridX
                 local tempY = self.highlightedTile.gridY
@@ -170,7 +168,25 @@ function PlayState:update(dt)
                 
                 -- once the swap is finished, we can tween falling blocks as needed
                 :finish(function()
-                    self:calculateMatches()
+                    if not self:calculateMatches() then
+                        local currentTile = self.board.tiles[y][x]
+                        tempX = newTile.gridX
+                        tempY = newTile.gridY
+                        newTile.gridX = currentTile.gridX
+                        newTile.gridY = currentTile.gridY
+                        currentTile.gridX = tempX
+                        currentTile.gridY = tempY
+
+                        self.board.tiles[currentTile.gridY][currentTile.gridX] = currentTile
+                        self.board.tiles[newTile.gridY][newTile.gridX] = newTile
+
+                        Timer.tween(0.1, {
+                            [currentTile] = {x = newTile.x, y = newTile.y},
+                            [newTile] = {x = currentTile.x, y = currentTile.y}
+                        })
+                        
+                        
+                    end
                 end)
             end
         end
@@ -197,7 +213,7 @@ function PlayState:calculateMatches()
         self.timer = self.timer + 1
         -- add score for each match
         for k, match in pairs(matches) do
-            self.score = self.score + #match * 50
+            self.score = self.score + match.score
         end
 
         -- remove any tiles that matched from the board, making empty spaces
@@ -214,10 +230,12 @@ function PlayState:calculateMatches()
             -- as a result of falling blocks once new blocks have finished falling
             self:calculateMatches()
         end)
+        return true
     
     -- if no matches, we can continue playing
     else
         self.canInput = true
+        return false
     end
 end
 
