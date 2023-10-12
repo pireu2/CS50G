@@ -90,6 +90,12 @@ function love.keypressed(key)
     love.keyboard.keysPressed[key] = true
 end
 
+function love.mousepressed(x,y,button)
+    if button == 1 then
+        return push:toGame(x,y)
+    end
+end
+
 function love.keyboard.wasPressed(key)
     if love.keyboard.keysPressed[key] then
         return true
