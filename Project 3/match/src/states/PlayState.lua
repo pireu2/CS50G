@@ -192,8 +192,15 @@ function PlayState:update(dt)
         end
     end
 
+    while not self.board:isPossibleMatch() do
+        self.board:initializeTiles()
+    end
+
+    
+
     Timer.update(dt)
 end
+
 
 --[[
     Calculates whether any matches were found on the board and tweens the needed
