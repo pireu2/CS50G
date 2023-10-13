@@ -37,7 +37,7 @@ function PlayState:init()
     self.highlightedTile = nil
 
     self.score = 0
-    self.timer = 60
+    self.timer = 5
 
     -- set our Timer class to turn cursor highlight on and off
     Timer.every(0.5, function()
@@ -68,9 +68,15 @@ function PlayState:enter(params)
 
     -- score we have to reach to get to the next level
     self.scoreGoal = self.level * 1.25 * 1000
+    self.mouseX = mouseCoords.x
+    self.mouseY = mouseCoords.y
 end
 
 function PlayState:update(dt)
+    local prevMouseX = self.mouseX
+    local prevMouseY = self.mouseY
+    self.mouseX = mouseCoords.x
+    self.mouseY = mouseCoords.y
 
     if love.keyboard.wasPressed('escape') then
         love.event.quit()
@@ -108,22 +114,27 @@ function PlayState:update(dt)
 
     if self.canInput then
         -- move cursor around based on bounds of grid, playing sounds
-        if love.keyboard.wasPressed('up') then
-            self.boardHighlightY = math.max(0, self.boardHighlightY - 1)
-            gSounds['select']:play()
-        elseif love.keyboard.wasPressed('down') then
-            self.boardHighlightY = math.min(7, self.boardHighlightY + 1)
-            gSounds['select']:play()
-        elseif love.keyboard.wasPressed('left') then
-            self.boardHighlightX = math.max(0, self.boardHighlightX - 1)
-            gSounds['select']:play()
-        elseif love.keyboard.wasPressed('right') then
-            self.boardHighlightX = math.min(7, self.boardHighlightX + 1)
-            gSounds['select']:play()
+        if self.mouseX == prevMouseX and self.mouseY == prevMouseY then
+            if love.keyboard.wasPressed('up') then
+                self.boardHighlightY = math.max(0, self.boardHighlightY - 1)
+                gSounds['select']:play()
+            elseif love.keyboard.wasPressed('down') then
+                self.boardHighlightY = math.min(7, self.boardHighlightY + 1)
+                gSounds['select']:play()
+            elseif love.keyboard.wasPressed('left') then
+                self.boardHighlightX = math.max(0, self.boardHighlightX - 1)
+                gSounds['select']:play()
+            elseif love.keyboard.wasPressed('right') then
+                self.boardHighlightX = math.min(7, self.boardHighlightX + 1)
+                gSounds['select']:play()
+            end
+        else
+            self:updateCursorPosition()
         end
 
+
         -- if we've pressed enter, to select or deselect a tile...
-        if love.keyboard.wasPressed('enter') or love.keyboard.wasPressed('return') then
+        if love.keyboard.wasPressed('enter') or love.keyboard.wasPressed('return') or love.mouse.wasPressed(1) then
             
             -- if same tile as currently highlighted, deselect
             local x = self.boardHighlightX + 1
@@ -199,6 +210,18 @@ function PlayState:update(dt)
     
 
     Timer.update(dt)
+end
+
+
+function PlayState:updateCursorPosition()
+    local x = mouseCoords.x
+    local y = mouseCoords.y
+    self.boardHighlightX = math.floor((x - (VIRTUAL_WIDTH - 272)) / 32)
+    self.boardHighlightY = math.floor((y - 16) / 32)
+    
+    -- Ensure the cursor position stays within the grid bounds
+    self.boardHighlightX = math.max(0, math.min(self.boardHighlightX, 7))
+    self.boardHighlightY = math.max(0, math.min(self.boardHighlightY, 7))
 end
 
 
