@@ -18,8 +18,12 @@ function PlayState:init()
     self.gravityOn = true
     self.gravityAmount = 6
 
+    local i = 1
+    while self.level.tileMap.tiles[7][i].id == TILE_ID_EMPTY do
+        i = i + 1
+    end
     self.player = Player({
-        x = 0, y = 0,
+        x = (i -  1) * TILE_SIZE, y = 0,
         width = 16, height = 20,
         texture = 'green-alien',
         stateMachine = StateMachine {
