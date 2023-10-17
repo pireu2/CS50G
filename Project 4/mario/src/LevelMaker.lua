@@ -21,11 +21,52 @@ function LevelMaker.generate(width, height)
     local topper = true
     local tileset = math.random(20)
     local topperset = math.random(20)
+    local keyColor = math.random(#KEYS)
+
 
     -- insert blank tables into tiles for later access
     for x = 1, height do
         table.insert(tiles, {})
     end
+
+    table.insert(objects,
+        GameObject {
+            texture = 'keys',
+            x = (5 - 1) * TILE_SIZE,
+            y = (4 - 1) * TILE_SIZE,
+            width = 16,
+            height = 16,
+            
+            -- select random frame from bush_ids whitelist, then random row for variance
+            frame = KEYS[keyColor],
+            collidable = true,
+            consumable = true,
+            solid = false,
+            onConsume = function(player)
+                gSounds['pickup']:play()
+                player.unlocked = true
+                gLocked = true
+            end
+        }
+    )
+
+    table.insert(objects,
+        GameObject {
+            texture = 'keys',
+            x = (3 - 1) * TILE_SIZE,
+            y = (4 - 1) * TILE_SIZE,
+            width = 16,
+            height = 16,
+            
+            -- select random frame from bush_ids whitelist, then random row for variance
+            frame = LOCKED[keyColor],
+            collidable = true,
+            solid = true,
+            onCollide = function(player)
+                print(player.unlocked)
+            end
+        }
+    )
 
     -- column by column generation instead of row; sometimes better for platformers
     for x = 1, width do
