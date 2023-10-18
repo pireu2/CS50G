@@ -14,7 +14,7 @@ function LevelMaker.generate(width, height)
     local tiles = {}
     local entities = {}
     local objects = {}
-
+    local map = TileMap(width, height)
     local tileID = TILE_ID_GROUND
     
     -- whether we should draw our tiles with toppers
@@ -23,7 +23,8 @@ function LevelMaker.generate(width, height)
     local topperset = math.random(20)
     local keyColor = math.random(#KEYS)
 
-
+    local keyX = math.random(width - 3)
+    local lockX = math.random(width - 3)
     -- insert blank tables into tiles for later access
     for x = 1, height do
         table.insert(tiles, {})
@@ -32,20 +33,18 @@ function LevelMaker.generate(width, height)
     table.insert(objects,
         GameObject {
             texture = 'keys',
-            x = (5 - 1) * TILE_SIZE,
+            x = keyX * TILE_SIZE,
             y = (4 - 1) * TILE_SIZE,
             width = 16,
             height = 16,
-            
-            -- select random frame from bush_ids whitelist, then random row for variance
             frame = KEYS[keyColor],
             collidable = true,
             consumable = true,
             solid = false,
             onConsume = function(player)
                 gSounds['pickup']:play()
-                player.unlocked = true
-                gLocked = true
+                player.score = player.score + 100
+                map.unlocked = true
             end
         }
     )
@@ -53,17 +52,60 @@ function LevelMaker.generate(width, height)
     table.insert(objects,
         GameObject {
             texture = 'keys',
-            x = (3 - 1) * TILE_SIZE,
+            x = lockX * TILE_SIZE,
             y = (4 - 1) * TILE_SIZE,
             width = 16,
             height = 16,
-            
-            -- select random frame from bush_ids whitelist, then random row for variance
             frame = LOCKED[keyColor],
             collidable = true,
             solid = true,
-            onCollide = function(player)
-                print(player.unlocked)
+            onCollide = function(object)
+                if map.unlocked then
+                    object.visible = false
+                    object.collidable = false
+                    object.solid = false
+                    gSounds['pickup']:play()
+                    if object.visible == false then
+                        table.insert(objects,
+                        GameObject {
+                            texture = 'flag-pole',
+                            x = (width - 2) * TILE_SIZE,
+                            y = (4 - 1) * TILE_SIZE,
+                            width = 16,
+                            height = 48,
+                            frame = math.random(6),
+                            collidable = false,
+                            solid = false,
+                            }
+                        )
+                        local flag = GameObject {
+                            texture = 'flag',
+                            x = (width - 2) * TILE_SIZE + TILE_SIZE / 2,
+                            y = (4 - 1) * TILE_SIZE,
+                            width = 16,
+                            height = 16,
+                            frame = FLAGS[math.random(#FLAGS)],
+                            collidable = true,
+                            solid = false,
+                            onCollide = function(player, obj)
+                                obj.down = true
+                                Timer.tween(1, {
+                                    [obj] = {y = obj.y + 36}
+                                }):finish(function ()
+                                    if obj.down then
+                                        gStateMachine:change('play', {
+                                            width = width + 25,
+                                            score = player.score})
+                                        obj.down = false
+                                    end
+                                end)
+                            end
+                            }
+                        
+
+                        table.insert(objects,flag)
+                    end
+                end
             end
         }
     )
@@ -95,12 +137,15 @@ function LevelMaker.generate(width, height)
                     Tile(x, y, tileID, y == 7 and topper or nil, tileset, topperset))
             end
 
+            if math.abs(x - width + 2) < 2 or math.abs(x - keyX) < 2 or math.abs(x - lockX) < 2 then
+                goto continue
+            end
             -- chance to generate a pillar
-            if math.random(8) == 1 then
+            if math.random(10) == 1 then
                 blockHeight = 2
                 
                 -- chance to generate bush on pillar
-                if math.random(8) == 1 then
+                if math.random(6) == 1 then
                     table.insert(objects,
                         GameObject {
                             texture = 'bushes',
@@ -200,9 +245,10 @@ function LevelMaker.generate(width, height)
                 )
             end
         end
+        ::continue::
     end
 
-    local map = TileMap(width, height)
+    
     map.tiles = tiles
     
     return GameLevel(entities, objects, map)

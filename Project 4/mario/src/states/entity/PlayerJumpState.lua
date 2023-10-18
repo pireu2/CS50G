@@ -68,6 +68,9 @@ function PlayerJumpState:update(dt)
                 object.onConsume(self.player)
                 table.remove(self.player.level.objects, k)
             end
+            if object.isflag then
+                object.onCollide(self.player,object)
+            end
         end
     end
 

@@ -10,6 +10,7 @@ TileMap = Class{}
 function TileMap:init(width, height)
     self.width = width
     self.height = height
+    self.unlocked = false
     self.tiles = {}
 end
 

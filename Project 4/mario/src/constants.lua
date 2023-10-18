@@ -94,6 +94,10 @@ LOCKED = {
     5,6,7,8
 }
 
+FLAGS = {
+    7,16,25,34
+}
+
 JUMP_BLOCKS = {}
 
 for i = 1, 30 do
