@@ -15,6 +15,7 @@ function PlayerSwingSwordState:init(player, dungeon)
     -- render offset for spaced character sprite
     self.player.offsetY = 5
     self.player.offsetX = 8
+    self.generateHeart = true
 
     -- create hitbox based on where the player is and facing
     local direction = self.player.direction
@@ -66,6 +67,26 @@ function PlayerSwingSwordState:update(dt)
         if entity:collides(self.swordHitbox) then
             entity:damage(1)
             gSounds['hit-enemy']:play()
+            if math.random(2) == 1 and self.generateHeart then
+                local heal = GameObject(
+                    GAME_OBJECT_DEFS['heal'],
+                    entity.x,
+                    entity.y
+                )
+                heal.onCollide = function ()
+                    if heal.state == 'unused' then
+                        heal.state = 'used'
+                        if self.player.health == 5 then
+                            self.player:heal(1)
+                        elseif self.player.health < 5 then
+                            self.player:heal(2)
+                        end
+                        self.generateHeart = true
+                    end
+                end
+                table.insert(self.dungeon.currentRoom.objects, heal)
+                self.generateHeart = false
+            end
         end
     end
 
