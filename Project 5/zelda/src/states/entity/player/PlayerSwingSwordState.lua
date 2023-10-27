@@ -67,7 +67,7 @@ function PlayerSwingSwordState:update(dt)
         if entity:collides(self.swordHitbox) then
             entity:damage(1)
             gSounds['hit-enemy']:play()
-            if math.random(2) == 1 and self.generateHeart then
+            if math.random(10) == 1 and self.generateHeart then
                 local heal = GameObject(
                     GAME_OBJECT_DEFS['heal'],
                     entity.x,
