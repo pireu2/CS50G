@@ -35,6 +35,16 @@ function EntityWalkState:update(dt)
             self.entity.x = MAP_RENDER_OFFSET_X + TILE_SIZE
             self.bumped = true
         end
+        if self.dungeon then
+            for k,object in pairs(self.dungeon.currentRoom.objects) do
+                if object.solid then
+                    if self.entity:collides(object) then
+                        self.entity.x = self.entity.x + 1
+                        self.bumped = true
+                    end
+                end
+            end
+        end
     elseif self.entity.direction == 'right' then
         self.entity.x = self.entity.x + self.entity.walkSpeed * dt
 
@@ -42,12 +52,33 @@ function EntityWalkState:update(dt)
             self.entity.x = VIRTUAL_WIDTH - TILE_SIZE * 2 - self.entity.width
             self.bumped = true
         end
+        if self.dungeon then
+            for k,object in pairs(self.dungeon.currentRoom.objects) do
+                if object.solid then
+                    if self.entity:collides(object) then
+                        self.entity.x = self.entity.x - 1
+                        self.bumped = true
+                    end
+                end
+            end
+        end
     elseif self.entity.direction == 'up' then
         self.entity.y = self.entity.y - self.entity.walkSpeed * dt
 
         if self.entity.y <= MAP_RENDER_OFFSET_Y + TILE_SIZE - self.entity.height / 2 then 
             self.entity.y = MAP_RENDER_OFFSET_Y + TILE_SIZE - self.entity.height / 2
             self.bumped = true
+        end
+
+        if self.dungeon then
+            for k,object in pairs(self.dungeon.currentRoom.objects) do
+                if object.solid then
+                    if self.entity:collides(object) then
+                        self.entity.y = self.entity.y + 1
+                        self.bumped = true
+                    end
+                end
+            end
         end
     elseif self.entity.direction == 'down' then
         self.entity.y = self.entity.y + self.entity.walkSpeed * dt
@@ -59,7 +90,22 @@ function EntityWalkState:update(dt)
             self.entity.y = bottomEdge - self.entity.height
             self.bumped = true
         end
+
+        if self.dungeon then
+            for k,object in pairs(self.dungeon.currentRoom.objects) do
+                if object.solid then
+                    if self.entity:collides(object) then
+                        self.entity.y = self.entity.y - 1
+                        self.bumped = true
+                    end
+                end
+            end
+        end
     end
+
+    
+    
+    
 end
 
 function EntityWalkState:processAI(params, dt)

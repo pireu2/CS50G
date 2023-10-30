@@ -27,17 +27,17 @@ GAME_OBJECT_DEFS = {
     ['pot'] = {
         type='throwable',
         texture='tiles',
-        frame = 110,
+        frame = 109,
         width = 16,
         height = 16,
         solid = true,
         defaultState = 'down',
         states = {
             ['down'] = {
-                frame = 110
+                frame = 109
             },
             ['up'] = {
-                frame = 110
+                frame = 109
             }
         }
     },

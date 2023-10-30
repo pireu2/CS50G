@@ -8,7 +8,7 @@
 
 Room = Class{}
 
-function Room:init(player)
+function Room:init(player,dungeon)
     self.width = MAP_WIDTH
     self.height = MAP_HEIGHT
 
@@ -32,6 +32,7 @@ function Room:init(player)
 
     -- reference to player for collisions, etc.
     self.player = player
+    self.dungeon = dungeon
 
     -- used for centering the dungeon rendering
     self.renderOffsetX = MAP_RENDER_OFFSET_X
@@ -68,7 +69,7 @@ function Room:generateEntities()
         })
 
         self.entities[i].stateMachine = StateMachine {
-            ['walk'] = function() return EntityWalkState(self.entities[i]) end,
+            ['walk'] = function() return EntityWalkState(self.entities[i], self.dungeon) end,
             ['idle'] = function() return EntityIdleState(self.entities[i]) end
         }
 
@@ -114,7 +115,7 @@ function Room:generateObjects()
     )
 
     pot.onCollide = function()
-        if love.keyboard.wasPressed('e')then
+        if love.keyboard.wasPressed('enter') or love.keyboard.wasPressed('return') then
             print('pickup')
         end
     end
@@ -197,7 +198,7 @@ function Room:update(dt)
         object:update(dt)
 
         -- trigger collision callback on object
-        if self.player:collides(object) then
+        if object:collides(self.player) then
             object:onCollide()
         end
     end
