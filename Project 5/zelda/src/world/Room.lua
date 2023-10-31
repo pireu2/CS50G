@@ -116,7 +116,7 @@ function Room:generateObjects()
 
     pot.onCollide = function()
         if love.keyboard.wasPressed('enter') or love.keyboard.wasPressed('return') then
-            print('pickup')
+            self.player:changeState('pick-up')
         end
     end
 

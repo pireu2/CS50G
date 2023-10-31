@@ -69,6 +69,12 @@ ENTITY_DEFS = {
                 interval = 0.05,
                 looping = false,
                 texture = 'character-swing-sword'
+            },
+            ['pick-up'] = {
+                frames = {7,8,9},
+                interval = 0.2,
+                looping = false,
+                texture = 'character-pot-lift'
             }
         }
     },

@@ -7,22 +7,26 @@
     cogden@cs50.harvard.edu
 ]]
 
-PlayerIdleState = Class{__includes = EntityIdleState}
+PlayerPickUp = Class{__includes = EntityIdleState}
 
-function PlayerIdleState:enter(params)
-    
+function PlayerPickUp:init(player, dungeon)
+    self.player = player
+    self.dungeon = dungeon
+    self.entity = player
     -- render offset for spaced character sprite (negated in render function of state)
-    self.entity.offsetY = 5
-    self.entity.offsetX = 0
+    self.player.offsetY = 5
+    self.player.offsetX = 0
+
+    self.player:changeAnimation('pick-up')
 end
 
-function PlayerIdleState:update(dt)
-    if love.keyboard.isDown('left') or love.keyboard.isDown('right') or
-       love.keyboard.isDown('up') or love.keyboard.isDown('down') then
-        self.entity:changeState('walk')
-    end
+function PlayerPickUp:update(dt)
+    print('picked-up in state')
+end
 
-    if love.keyboard.wasPressed('space') then
-        self.entity:changeState('swing-sword')
-    end
+function PlayerSwingSwordState:render()
+    local anim = self.player.currentAnimation
+    love.graphics.draw(gTextures[anim.texture], gFrames[anim.texture][anim:getCurrentFrame()],
+            math.floor(self.player.x - self.player.offsetX), math.floor(self.player.y - self.player.offsetY))
+
 end
