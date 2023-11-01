@@ -44,7 +44,7 @@ function GameObject:collides(target)
 end
 
 function GameObject:render(adjacentOffsetX, adjacentOffsetY)
-    if self.state ~= 'used' then
+    if self.state ~= 'used' and self.state ~= 'up' then
         love.graphics.draw(gTextures[self.texture], gFrames[self.texture][self.states[self.state].frame or self.frame],
             self.x + adjacentOffsetX, self.y + adjacentOffsetY)
     end
