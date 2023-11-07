@@ -5,10 +5,8 @@
     Author: Colton Ogden
     cogden@cs50.harvard.edu
 ]]
-
 Projectile = Class{}
-
-function Projectile:init(params, dungeon)
+function Projectile:init(params, dungeon )
     self.originX = params.x
     self. originY = params.y
     self.x = params.x
