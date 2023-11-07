@@ -24,6 +24,10 @@ function PlayerIdlePot:update(dt)
             love.keyboard.isDown('up') or love.keyboard.isDown('down') then
         self.entity:changeState('pot-walk')
     end
+    if love.keyboard.wasPressed('space') then
+        print('throw')
+        self.entity:changeState('throw')
+    end
 end
 
 function PlayerIdlePot:render()

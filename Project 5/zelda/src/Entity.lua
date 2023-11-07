@@ -15,6 +15,12 @@ function Entity:init(def)
 
     self.animations = self:createAnimations(def.animations)
 
+    if def.type then
+        self.type = def.type
+    else
+        self.type = 'none'
+    end
+
     -- dimensions
     self.x = def.x
     self.y = def.y

@@ -35,6 +35,9 @@ function PlayerWalkPot:update(dt)
         self.entity:changeState('pot-idle')
     end
 
+    if love.keyboard.wasPressed('space') then
+        self.entity:changeState('throw')
+    end
 
     EntityWalkState.update(self,dt)
 

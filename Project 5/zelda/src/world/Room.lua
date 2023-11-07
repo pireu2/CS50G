@@ -55,7 +55,7 @@ function Room:generateEntities()
         table.insert(self.entities, Entity {
             animations = ENTITY_DEFS[type].animations,
             walkSpeed = ENTITY_DEFS[type].walkSpeed or 20,
-
+            type = 'enemy',
             -- ensure X and Y are within bounds of the map
             x = math.random(MAP_RENDER_OFFSET_X + TILE_SIZE,
                 VIRTUAL_WIDTH - TILE_SIZE * 2 - 16),

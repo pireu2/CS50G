@@ -12,7 +12,7 @@ function PlayState:init()
     self.player = Player {
         animations = ENTITY_DEFS['player'].animations,
         walkSpeed = ENTITY_DEFS['player'].walkSpeed,
-        
+        type = 'player',
         x = VIRTUAL_WIDTH / 2 - 8,
         y = VIRTUAL_HEIGHT / 2 - 11,
         
@@ -35,7 +35,8 @@ function PlayState:init()
         ['swing-sword'] = function() return PlayerSwingSwordState(self.player, self.dungeon) end,
         ['pick-up'] = function() return PlayerPickUp(self.player, self.dungeon) end,
         ['pot-walk'] = function() return PlayerWalkPot(self.player, self.dungeon)  end,
-        ['pot-idle'] = function() return PlayerIdlePot(self.player, self.dungeon)  end
+        ['pot-idle'] = function() return PlayerIdlePot(self.player, self.dungeon)  end,
+        ['throw'] = function() return PlayerThrowState(self.player, self.dungeon) end
     }
     self.player:changeState('idle')
 end
