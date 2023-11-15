@@ -33,6 +33,10 @@ function Alien:init(world, type, x, y, userData)
     self.launched = false
 end
 
+function Alien:split()
+
+end
+
 function Alien:render()
     love.graphics.draw(gTextures['aliens'], gFrames['aliens'][self.sprite],
         math.floor(self.body:getX()), math.floor(self.body:getY()), self.body:getAngle(),
