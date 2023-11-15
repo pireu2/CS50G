@@ -18,6 +18,8 @@ function Level:init()
     -- actual collision callbacks can cause stack overflow and other errors
     self.destroyedBodies = {}
 
+    self.hit = false
+
     -- define collision callbacks for our world; the World object expects four,
     -- one for different stages of any given collision
     function beginContact(a, b, coll)
@@ -28,6 +30,7 @@ function Level:init()
         -- if we collided between both the player and an obstacle...
         if types['Obstacle'] and types['Player'] then
 
+            self.hit = true
             -- grab the body that belongs to the player
             local playerFixture = a:getUserData() == 'Player' and a or b
             local obstacleFixture = a:getUserData() == 'Obstacle' and a or b
@@ -60,6 +63,7 @@ function Level:init()
         -- if we collided between the player and the alien...
         if types['Player'] and types['Alien'] then
 
+            self.hit = true
             -- grab the bodies that belong to the player and alien
             local playerFixture = a:getUserData() == 'Player' and a or b
             local alienFixture = a:getUserData() == 'Alien' and a or b
@@ -146,6 +150,12 @@ function Level:update(dt)
         end
     end
 
+    if love.keyboard.wasPressed('space') or love.mouse.wasPressed(1) then
+        if self.launchMarker.launched and not self.hit and self.launchMarker.alien.canSplit then
+            self.launchMarker.alien:split()
+        end
+    end
+
     -- reset destroyed bodies to empty table for next update phase
     self.destroyedBodies = {}
 
@@ -172,14 +182,14 @@ function Level:update(dt)
 
     -- replace launch marker if original alien stopped moving
     if self.launchMarker.launched then
-        local xPos, yPos = self.launchMarker.alien.body:getPosition()
-        local xVel, yVel = self.launchMarker.alien.body:getLinearVelocity()
-        
-        -- if we fired our alien to the left or it's almost done rolling, respawn
-        if xPos < 0 or (math.abs(xVel) + math.abs(yVel) < 1.5) then
+        if self.launchMarker.alien:hasStopped() then
+
+            for k, alien in pairs(self.launchMarker.alien.siblings) do
+                alien.body:destroy()
+            end
             self.launchMarker.alien.body:destroy()
             self.launchMarker = AlienLaunchMarker(self.world)
-
+            self.hit = false
             -- re-initialize level if we have no more aliens
             if #self.aliens == 0 then
                 gStateMachine:change('start')
