@@ -82,8 +82,8 @@ end
 
 function Alien:render()
     love.graphics.draw(gTextures['aliens'], gFrames['aliens'][self.sprite],
-        math.floor(self.body:getX()), math.floor(self.body:getY()), self.body:getAngle(),
-        1, 1, 17.5, 17.5)
+            math.floor(self.body:getX()), math.floor(self.body:getY()), self.body:getAngle(),
+            1, 1, 17.5, 17.5)
 
     if #self.siblings == 2 then
         love.graphics.draw(gTextures['aliens'], gFrames['aliens'][self.siblings[1].sprite],
