@@ -17,6 +17,11 @@ function Selection:init(def)
     self.items = def.items
     self.x = def.x
     self.y = def.y
+    if def.selectable ~= nil then
+        self.selectable = def.selectable
+    else
+        self.selectable = true
+    end
 
     self.height = def.height
     self.width = def.width
@@ -28,41 +33,70 @@ function Selection:init(def)
 end
 
 function Selection:update(dt)
-    if love.keyboard.wasPressed('up') then
-        if self.currentSelection == 1 then
-            self.currentSelection = #self.items
-        else
-            self.currentSelection = self.currentSelection - 1
+    if self.selectable then
+        if love.keyboard.wasPressed('up') then
+            if self.currentSelection == 1 then
+                self.currentSelection = #self.items
+            else
+                self.currentSelection = self.currentSelection - 1
+            end
+            
+            gSounds['blip']:stop()
+            gSounds['blip']:play()
+        elseif love.keyboard.wasPressed('down') then
+            if self.currentSelection == #self.items then
+                self.currentSelection = 1
+            else
+                self.currentSelection = self.currentSelection + 1
+            end
+            
+            gSounds['blip']:stop()
+            gSounds['blip']:play()
+        elseif love.keyboard.wasPressed('return') or love.keyboard.wasPressed('enter') then
+            self.items[self.currentSelection].onSelect()
+            
+            gSounds['blip']:stop()
+            gSounds['blip']:play()
         end
-        
-        gSounds['blip']:stop()
-        gSounds['blip']:play()
-    elseif love.keyboard.wasPressed('down') then
-        if self.currentSelection == #self.items then
-            self.currentSelection = 1
-        else
-            self.currentSelection = self.currentSelection + 1
+    else
+        if love.keyboard.wasPressed('return') then
+            gStateStack:push(FadeInState({
+                r = 1, g = 1, b = 1
+            }, 1,
+            
+            -- pop message and battle state and add a fade to blend in the field
+                function()
+
+                    -- resume field music
+                    gSounds['field-music']:play()
+
+                    gStateStack:pop()
+
+                    gStateStack:pop()
+
+                    gStateStack:push(FadeOutState({
+                        r = 1, g = 1, b = 1
+                    }, 1, function()
+                        -- do nothing after fade out ends
+                    end))
+                end))
+            gSounds['blip']:stop()
+            gSounds['blip']:play()
         end
-        
-        gSounds['blip']:stop()
-        gSounds['blip']:play()
-    elseif love.keyboard.wasPressed('return') or love.keyboard.wasPressed('enter') then
-        self.items[self.currentSelection].onSelect()
-        
-        gSounds['blip']:stop()
-        gSounds['blip']:play()
     end
 end
 
 function Selection:render()
     local currentY = self.y
-
+   
     for i = 1, #self.items do
         local paddedY = currentY + (self.gapHeight / 2) - self.font:getHeight() / 2
 
         -- draw selection marker if we're at the right index
-        if i == self.currentSelection then
-            love.graphics.draw(gTextures['cursor'], self.x - 8, paddedY)
+        if self.selectable then
+            if i == self.currentSelection then
+                love.graphics.draw(gTextures['cursor'], self.x - 8, paddedY)
+            end
         end
 
         love.graphics.printf(self.items[i].text, self.x, paddedY, self.width, 'center')

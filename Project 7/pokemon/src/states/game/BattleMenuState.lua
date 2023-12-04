@@ -51,7 +51,7 @@ function BattleMenuState:init(battleState)
                             gStateStack:pop()
 
                             -- pop battle state
-                            gStateStack:pop()
+                            --gStateStack:pop()
 
                             gStateStack:push(FadeOutState({
                                 r = 1, g = 1, b = 1

@@ -92,7 +92,11 @@ function Pokemon:statsLevelUp()
         end
     end
 
-    return HPIncrease, attackIncrease, defenseIncrease, speedIncrease
+    return {
+        HPIncrease= HPIncrease,
+        attackIncrease = attackIncrease,
+        defenseIncrease = defenseIncrease,
+        speedIncrease = speedIncrease}
 end
 
 function Pokemon:levelUp()
