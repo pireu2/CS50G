@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 
 public class HeliController : MonoBehaviour {
@@ -55,6 +56,19 @@ public class HeliController : MonoBehaviour {
 
 	public void PickupCoin() {
 		coinTotal += 1;
+
+		// trigger audio playback and emit particles from particle system
+		GetComponents<AudioSource>()[0].Play();
+		GetComponent<ParticleSystem>().Play();
+	}
+
+	public void PickupCoin(int value)
+	{
+		if (value < 0)
+		{
+			throw new ArgumentOutOfRangeException("value", "Value must be positive");
+		}
+		coinTotal += value;
 
 		// trigger audio playback and emit particles from particle system
 		GetComponents<AudioSource>()[0].Play();
